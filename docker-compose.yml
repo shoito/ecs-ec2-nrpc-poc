@@ -1,0 +1,33 @@
+version: "3.7"
+services:
+  nrpc:
+    container_name: poc-nrpc-service
+    build:
+      context: ./containers/nrpc
+    ports:
+      - "9080:80"
+    networks:
+      - poc
+    depends_on:
+      - xyz-bff
+      - abc-bff
+  xyz-bff:
+    container_name: poc-xyz-bff-service
+    build:
+      context: ./containers/xyz-bff
+    ports:
+      - "13000:3000"
+    networks:
+      - poc
+  abc-bff:
+    container_name: poc-abc-bff-service
+    build:
+      context: ./containers/abc-bff
+    ports:
+      - "23000:3000"
+    networks:
+      - poc
+
+networks:
+  poc:
+    name: poc.internal
