@@ -2,7 +2,6 @@ import * as cdk from "@aws-cdk/core";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as elb from "@aws-cdk/aws-elasticloadbalancingv2";
 import * as cloudmap from "@aws-cdk/aws-servicediscovery";
-import * as iam from "@aws-cdk/aws-iam";
 
 export interface ExtendedStackProps extends cdk.StackProps {
   cluster: ecs.Cluster;
@@ -19,20 +18,28 @@ export class EcsNrpcServiceStack extends cdk.Stack {
       streamPrefix: "poc",
     });
 
+    const sourceVolumeName = "nginx";
+    const hostSourcePath = "/var/cache/nginx";
     const taskDef = new ecs.Ec2TaskDefinition(
       this,
       "poc-ecs-ec2-nrpc-task-def",
       {
         family: "poc-ecs-ec2-nrpc-task",
         networkMode: ecs.NetworkMode.AWS_VPC,
-        // FIXME containerDefinitions
         volumes: [
           {
-            name: "nginx",
+            name: sourceVolumeName,
             host: {
-              sourcePath: "/var/cache/nginx",
+              sourcePath: hostSourcePath,
             },
           },
+          // {
+          //   name: sourceVolumeName,
+          //   dockerVolumeConfiguration: {
+          //     driver: "local",
+          //     scope: ecs.Scope.TASK,
+          //   },
+          // },
         ],
       }
     );
@@ -42,6 +49,12 @@ export class EcsNrpcServiceStack extends cdk.Stack {
       memoryLimitMiB: 512,
       cpu: 256,
       logging: logDriver,
+    });
+
+    container.addMountPoints({
+      sourceVolume: sourceVolumeName,
+      containerPath: hostSourcePath,
+      readOnly: false,
     });
 
     container.addPortMappings({

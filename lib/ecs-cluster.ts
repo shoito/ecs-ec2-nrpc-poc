@@ -2,7 +2,7 @@ import * as cdk from "@aws-cdk/core";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as ecs from "@aws-cdk/aws-ecs";
 import * as cloudmap from "@aws-cdk/aws-servicediscovery";
-import { InstanceSize } from "@aws-cdk/aws-ec2";
+import * as iam from "@aws-cdk/aws-iam";
 
 export interface ExtendedStackProps extends cdk.StackProps {
   vpc: ec2.IVpc;
@@ -23,12 +23,17 @@ export class EcsClusterStack extends cdk.Stack {
         type: cloudmap.NamespaceType.DNS_PRIVATE,
       },
     });
-    this.cluster.addCapacity("poc-cluster-auto-scaling-group", {
+
+    const asg = this.cluster.addCapacity("poc-cluster-auto-scaling-group", {
       instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.T3,
-        ec2.InstanceSize.MICRO
+        ec2.InstanceClass.A1,
+        ec2.InstanceSize.LARGE
       ),
+      machineImage: ecs.EcsOptimizedImage.amazonLinux2(ecs.AmiHardwareType.ARM), // A1インスタンスはARMである必要がある
       desiredCapacity: 2, // ECS(EC2) ServiceのdesiredCountはこの値以下である必要がある
     });
+    asg.role.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
+    );
   }
 }
