@@ -26,6 +26,7 @@ export class EcsNrpcServiceStack extends cdk.Stack {
       {
         family: "poc-ecs-ec2-nrpc-task",
         networkMode: ecs.NetworkMode.AWS_VPC,
+        // nginx reverse proxy cacheをバインドマウントする
         volumes: [
           {
             name: sourceVolumeName,
@@ -51,6 +52,7 @@ export class EcsNrpcServiceStack extends cdk.Stack {
       logging: logDriver,
     });
 
+    // nginx reverse proxy cacheをバインドマウントする
     container.addMountPoints({
       sourceVolume: sourceVolumeName,
       containerPath: hostSourcePath,
@@ -69,7 +71,9 @@ export class EcsNrpcServiceStack extends cdk.Stack {
       taskDefinition: taskDef,
       desiredCount: 2, // ECS ClusterのdesiredCapacityはこの値以上である必要がある
       healthCheckGracePeriod: cdk.Duration.minutes(1),
-      deploymentController: { type: ecs.DeploymentControllerType.ECS },
+      deploymentController: {
+        type: ecs.DeploymentControllerType.ECS,
+      },
     });
 
     service.enableCloudMap({

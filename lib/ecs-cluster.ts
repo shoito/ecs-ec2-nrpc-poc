@@ -32,6 +32,7 @@ export class EcsClusterStack extends cdk.Stack {
       machineImage: ecs.EcsOptimizedImage.amazonLinux2(ecs.AmiHardwareType.ARM), // A1インスタンスはARMである必要がある
       desiredCapacity: 2, // ECS(EC2) ServiceのdesiredCountはこの値以下である必要がある
     });
+    // Session ManagerによるECSインスタンスへの接続ができるようにする
     asg.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
     );

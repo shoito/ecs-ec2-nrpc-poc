@@ -21,7 +21,7 @@ brew install k6
 
 ### Running
 
-`cdk deploy` によりデプロイされたエンドポイントになるように `test/load.js` の `BASE_PATH` を修正して、下記を実行する。  
+`cdk deploy` によりデプロイされた ALB のエンドポイントになるように `test/load.js` の `BASE_PATH` を修正して、下記を実行する。
 
 ```sh
 npm run test:load
